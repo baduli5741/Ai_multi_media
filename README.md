@@ -1,7 +1,9 @@
 # AI 애니메이션 큐레이터
-<img width="875" height="1094" alt="image" src="https://github.com/user-attachments/assets/01036365-0316-4cfb-a4bb-ae3146af146a" />
-
 이 프로젝트는 사용자의 애니메이션 취향을 분석하여 맞춤형 애니메이션 3개를 추천해주는 AI 기반 큐레이터 애플리케이션입니다.
+<img width="875" height="1094" alt="image" src="https://github.com/user-attachments/assets/01036365-0316-4cfb-a4bb-ae3146af146a" />
+<img width="781" height="1071" alt="image" src="https://github.com/user-attachments/assets/d45bae62-c495-4541-a515-cdb7c1e9b3d9" />
+
+
 
 ## 🚀 프로젝트 실행 방법 (로컬)
 
