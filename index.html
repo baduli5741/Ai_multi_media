@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 애니메이션 취향 큐레이터</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #f0f7ff; /* 연한 파스텔 블루 */
+            --primary-color: #ff9843; /* 주황색 계열 */
+            --primary-dark-color: #e67e22; /* 주황색 hover */
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --header-bg-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            padding: 2em;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        header {
+            background-color: var(--header-bg-color);
+            padding: 2em;
+            border-radius: 12px;
+            margin-bottom: 2em;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+        
+        header p {
+            color: #6c757d;
+            font-size: 1.1em;
+            margin-top: 0.5em;
+        }
+
+        .input-section {
+            margin-bottom: 2em;
+        }
+
+        textarea#user-preference {
+            width: 80%;
+            height: 100px;
+            padding: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-size: 1em;
+            resize: vertical;
+            margin-bottom: 1em;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark-color);
+        }
+
+        h2 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            padding-bottom: 0.5em;
+            border-bottom: 1px solid #ffddc1;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary-dark-color);
+            margin: 2em 0;
+        }
+
+        pre#analysis-output {
+            background-color: #e9ecef;
+            padding: 1.5em;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            text-align: left;
+            margin-top: 1em;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        
+        .recommendation-card {
+            background-color: var(--card-bg-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 1.5em;
+            margin-bottom: 1.5em;
+            text-align: left;
+        }
+
+        .recommendation-card strong {
+            font-size: 1.4em;
+            color: var(--primary-dark-color);
+        }
+        
+        .recommendation-card .tags {
+            font-style: italic;
+            color: #6c757d;
+            margin: 0.5em 0;
+        }
+
+        .recommendation-card .reason {
+            margin-top: 0.8em;
+            color: #495057;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 AI 애니메이션 큐레이터</h1>
+            <p>당신의 애니메이션 성향을 자유롭게 적어주세요. (예: 어둡고 심오하며, 주인공이 고통받는 판타지물을 좋아해요.)</p>
+        </header>
+        
+        <div class="input-section">
+            <textarea id="user-preference" rows="5" placeholder="여기에 성향을 입력하세요..."></textarea>
+            <br>
+            <button onclick="getRecommendation()">추천 받기</button>
+        </div>
+
+        <div class="results-section">
+            <h2>✨ 분석 결과 및 추천</h2>
+            <div id="loading" style="display:none;">분석 중... 잠시만 기다려주세요!</div>
+            <pre id="analysis-output"></pre>
+            <div id="recommendation-list"></div>
+        </div>
+    </div>
+
+    <script>
+        async function getRecommendation() {
+            const preference = document.getElementById('user-preference').value;
+            const outputDiv = document.getElementById('analysis-output');
+            const loadingDiv = document.getElementById('loading');
+            const recommendationList = document.getElementById('recommendation-list');
+            
+            if (!preference.trim()) {
+                alert('애니메이션 성향을 입력해주세요!');
+                return;
+            }
+            
+            loadingDiv.style.display = 'block';
+            outputDiv.textContent = '';
+            outputDiv.style.display = 'none';
+            recommendationList.innerHTML = '';
+
+            try {
+                const response = await fetch('http://localhost:3000/recommend', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ preference: preference })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                outputDiv.textContent = `[AI 분석]: ${result.user_analysis}`;
+                outputDiv.style.display = 'block';
+                
+                let htmlContent = '';
+                result.recommendations.forEach(rec => {
+                    htmlContent += `
+                        <div class="recommendation-card">
+                            <strong>${rec.title}</strong>
+                            <div class="tags">${rec.genre_tags.join(', ')}</div>
+                            <div class="reason"><strong>추천 이유:</strong> ${rec.reason}</div>
+                        </div>
+                    `;
+                });
+                recommendationList.innerHTML = htmlContent;
+
+            } catch (error) {
+                console.error('추천 요청 중 오류 발생:', error);
+                outputDiv.textContent = '오류: 추천을 받을 수 없습니다. 서버 상태를 확인하세요.';
+                outputDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
