@@ -178,7 +178,7 @@
             recommendationList.innerHTML = '';
 
             try {
-                const response = await fetch('http://localhost:3000/recommend', { 
+                const response = await fetch('https://4581c4ff-67ac-4330-a6b7-9f22b18632b4-00-1s05813ck5uq7.pike.replit.dev/recommend', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ preference: preference })
